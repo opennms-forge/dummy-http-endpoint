@@ -27,6 +27,13 @@ jobs:
               key: maven-dependencies-v2-{{ checksum "pom.xml" }}
               paths:
                 - ~/.m2
+      - run: docker login -u ${CONTAINER_REGISTRY_LOGIN} -p ${CONTAINER_REGISTRY_PASS}
+      - run:
+          name: Push Docker image
+          command: |
+              MVN_VERSION=$(mvn -B help:evaluate -Dstyle.color=never -Dexpression=project.version -q -DforceStdout)
+              echo "Version: ${MVN_VERSION}"
+              docker push opennms/dummy-http-endpoint:${MVN_VERSION}
       - store_test_results:
           path: target/surefire-reports
       - store_artifacts:
