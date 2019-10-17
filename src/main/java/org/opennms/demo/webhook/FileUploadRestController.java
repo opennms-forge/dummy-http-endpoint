@@ -44,8 +44,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -75,9 +75,9 @@ public class FileUploadRestController {
         }
     }
 
-    @GetMapping(params = "{id}")
-    public ResponseEntity<Resource> getFile(@PathVariable String instanceId) {
-        final FileSystemResource resource = new FileSystemResource(Paths.get(uploadDir, instanceId));
+    @GetMapping(path = "{name}")
+    public ResponseEntity<Resource> getFile(@PathVariable("name") String filename) {
+        final FileSystemResource resource = new FileSystemResource(Paths.get(uploadDir, filename));
         if (!resource.exists()) {
             return ResponseEntity.notFound().build();
         }
@@ -90,7 +90,6 @@ public class FileUploadRestController {
 
     @GetMapping
     public ResponseEntity<String> listFiles() throws IOException {
-        final JSONArray objects = new JSONArray();
         final List<JSONObject> files = Files.list(Paths.get(uploadDir))
                 .filter(p -> Files.isReadable(p) && p.toString().endsWith(".pdf") || p.toString().endsWith(".csv"))
                 .map(p -> {
@@ -100,17 +99,16 @@ public class FileUploadRestController {
                     return file;
                 })
                 .collect(Collectors.toList());
-        objects.put(files);
 
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(objects.toString());
+                .body(files.toString());
     }
 
     @RequestMapping(method = { RequestMethod.POST, RequestMethod.PUT }, consumes = { "multipart/form-data" })
     ResponseEntity<?> saveFile(@RequestParam("file") MultipartFile file, @RequestParam("instanceId") String instanceId) throws Exception {
-        if (instanceId == null) {
-            return ResponseEntity.badRequest().build();
+        if (instanceId != null) {
+            LoggerFactory.getLogger(getClass()).info("Persisting file {} for instanceId {}", file.getOriginalFilename(), instanceId);
         }
         try (InputStream in = file.getInputStream();
              OutputStream out = new FileOutputStream(Paths.get(uploadDir, file.getOriginalFilename()).toFile()))
@@ -119,8 +117,7 @@ public class FileUploadRestController {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-
-        final URI location = fromCurrentRequest().buildAndExpand(instanceId).toUri();
+        final URI location = fromCurrentRequest().buildAndExpand(file.getOriginalFilename()).toUri();
         return ResponseEntity.created(location).build();
     }
 }
