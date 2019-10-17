@@ -24,7 +24,7 @@ jobs:
           command: |
             mvn -B dockerfile:build
       - save_cache:
-              key: maven-dependencies-v1-{{ checksum "pom.xml" }}
+              key: maven-dependencies-v2-{{ checksum "pom.xml" }}
               paths:
                 - ~/.m2
       - store_test_results:
