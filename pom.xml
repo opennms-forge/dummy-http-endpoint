@@ -8,13 +8,14 @@
     <version>2.1.9.RELEASE</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
-  <groupId>org.opennms.demo</groupId>
-  <artifactId>webhook</artifactId>
+  <groupId>org.opennms.dummy</groupId>
+  <artifactId>dummy-http-endpoint</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>webhook</name>
   <description>Demo project for Spring Boot</description>
   <properties>
     <java.version>1.8</java.version>
+    <docker.image.prefix>opennms</docker.image.prefix>
   </properties>
   <dependencies>
     <dependency>
@@ -44,6 +45,18 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
+       <plugin>
+            <groupId>com.spotify</groupId>
+            <artifactId>dockerfile-maven-plugin</artifactId>
+            <version>1.4.13</version>
+            <configuration>
+                <repository>${docker.image.prefix}/${project.artifactId}</repository>
+                <tag>${project.version}</tag>
+                <buildArgs>
+                  <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+                </buildArgs>
+            </configuration>
+        </plugin>
     </plugins>
   </build>
 </project>

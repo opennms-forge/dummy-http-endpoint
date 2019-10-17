@@ -15,17 +15,17 @@ jobs:
             - maven-dependencies-v1-{{ checksum "pom.xml" }}
             - maven-dependencies-v1-
       - run: rm -rf ~/.m2/repository/org/opennms
-      - run: mvn clean validate
-      - run: mvn test-compile
-      - run: mvn verify
+      - run: mvn -B clean validate
+      - run: mvn -B test-compile
+      - run: mvn -B verify
       - save_cache:
           key: maven-dependencies-v1-{{ checksum "pom.xml" }}
           paths:
             - ~/.m2  
-      - run: 
+      - run:
           name : Build Docker Image
           command: |
-            echo "Hello"
+            mvn -B dockerfile:build
       - store_test_results:
           path: target/surefire-reports
       - store_artifacts:
