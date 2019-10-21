@@ -1,4 +1,4 @@
-# dummy-http-endpoint
+# OpenNMS dummy-http-endpoint
 Java application which accepts files pushed via http. Used for test purposes.
 
  - Docker Image: https://hub.docker.com/r/opennms/dummy-http-endpoint
